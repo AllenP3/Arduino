@@ -1,6 +1,3 @@
-
-//geeky singh 14th dec 2015 for instructables.com
-
 #define SRC_NEUTRAL 1500
 #define SRC_MAX 2000
 #define SRC_MIN 1000
