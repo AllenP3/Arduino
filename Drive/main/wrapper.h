@@ -21,14 +21,7 @@ PPMReader ppm(interruptPin, channelAmount);
 void setup()
 {
   Serial.begin(9600);
-  /*pinMode(ML_Ctrl, OUTPUT);//set direction control pins of group B motor to output
-  pinMode(ML_PWM, OUTPUT);//set PWM control pins of group B motor to output
-  pinMode(MR_Ctrl, OUTPUT);//set direction control pins of group A motor to output
-  pinMode(MR_PWM, OUTPUT);//set PWM control pins of group A motor to output
-  digitalWrite(ML_Ctrl, HIGH);//set the direction control pins of group B motor to HIGH
-  analogWrite(ML_PWM,105);//set the PWM control speed of group B motor to 55*/
-
-  delay(255);//delay in 2000ms
+  delay(255);//delay
   digitalWrite(ML_Ctrl, LOW);// set the direction control pins of group B motor to LOW level
   analogWrite(ML_PWM,0);//set the PWM control speed of group B motor to 0
   digitalWrite(MR_Ctrl, LOW);// set the direction control pins of group A motor to LOW level
@@ -99,38 +92,34 @@ void move_backward()
   analogWrite(ML_Ctrl, pp1);
   analogWrite(MR_Ctrl, pp2);
 }
-/*void move_left()
+void move_left()
 {
-  digitalWrite(ml1, HIGH);
-  digitalWrite(ml2, LOW);
-  digitalWrite(mr1, HIGH);
-  digitalWrite(mr2, LOW);
-  analogWrite(pwm1, pp3);
-  analogWrite(pwm2, pp4);
+  digitalWrite(ML_Ctrl, LOW);// set the direction control pins of group B motor to LOW level
+  digitalWrite(MR_Ctrl, HIGH);// set the direction control pins of group B motor to LOW level
   Serial.println("LEFT");
+  analogWrite(ML_Ctrl, pp1);
+  analogWrite(MR_Ctrl, pp2);
 }
 
 void move_right()
 {
-  digitalWrite(ml1, LOW);
-  digitalWrite(ml2, HIGH);
-  digitalWrite(mr1, LOW);
-  digitalWrite(mr2, HIGH);
-  analogWrite(pwm1, pp3);
-  analogWrite(pwm2, pp4);
+  digitalWrite(ML_Ctrl, HIGH);// set the direction control pins of group B motor to LOW level
+  digitalWrite(MR_Ctrl, LOW);// set the direction control pins of group B motor to LOW level
   Serial.println("RIGHT");
-}*/
+  analogWrite(ML_Ctrl, pp1);
+  analogWrite(MR_Ctrl, pp2);
+}
 
 void neutral() // neutral gear activation
 {
-   digitalWrite(ML_Ctrl, LOW);// set the direction control pins of group B motor to LOW level
+  digitalWrite(ML_Ctrl, LOW);
   digitalWrite(MR_Ctrl, LOW);// set the direction control pins of group B motor to LOW level
   analogWrite(ML_Ctrl, 0);
   analogWrite(MR_Ctrl, 0);
   Serial.println("NEUTRAL");
 }
 
-void mobilize() // move the bot according to the command received
+void mobilize() 
 {
   if (ch[2] > 1485 && ch[2] < 1515) // stay idle
   {
@@ -153,7 +142,7 @@ void mobilize() // move the bot according to the command received
     Serial.println("Moving Forward");
 
   }
-  /*if (ch[3] > 1485 && ch[3] < 1515) // used to stop the when chl_neutral and ch3_neutral are true
+  if (ch[3] > 1485 && ch[3] < 1515) // used to stop the when chl_neutral and ch3_neutral are true
   {
     ch3_neutral = true;
   }
@@ -170,10 +159,34 @@ void mobilize() // move the bot according to the command received
     pp3 = abs(map(ch[3], 1000, 1485, var_maxPWMTurn , 0));
     pp4 = abs(map(ch[3], 1000, 1485, var_maxPWMTurn , 0));
     move_left();
-  }*/
-  if (ch2_neutral && ch3_neutral) // Stop the bot
+  }
+  else if(ch2_neutral == false && ch3_neutral == false){
+    turn();
+  }
+
+  if (ch2_neutral == true && ch3_neutral == true) // neutral gear activation
   {
     neutral();
   }
 }
-//************************************************************************
+
+void turn(){
+  if (ch[3] > 1485 && ch[3] < 1515) // used to stop the when chl_neutral and ch3_neutral are true
+  {
+    ch3_neutral = true;
+  }
+  else if (ch[3] > 1515) // move right
+  {
+    ch3_neutral = false;
+    pp3 = abs(map(ch[3], 1515, 2000, 0, var_maxPWMTurn ));
+    pp4 = abs(map(ch[3], 1515, 2000, 0, var_maxPWMTurn ));
+    move_right();
+  }
+  else if (ch[3] < 1485) // move left
+  {
+    ch3_neutral = false;
+    pp3 = abs(map(ch[3], 1000, 1485, var_maxPWMTurn , 0));
+    pp4 = abs(map(ch[3], 1000, 1485, var_maxPWMTurn , 0));
+    move_left();
+  }
+}
