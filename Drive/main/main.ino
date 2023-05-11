@@ -9,8 +9,8 @@ void loop()
   }
   Serial.println(); 
 
-  mobilize();
-  //neutral;
+  //mobilize();
+  neutral;
 }
 
   // neutral(); // stop the bot
@@ -78,7 +78,6 @@ void loop()
     Serial.println(String(drivevalue));
     Serial.println();
  */
-    
 /*
 void loop()
 {
