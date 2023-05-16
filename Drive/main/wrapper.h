@@ -14,14 +14,17 @@ int ch[6];
 int trigPin = 12;
 int echoPin = 13;
 int pp1, pp2, pp3, pp4, pp5, pos, pulsewidth, duration, dist, val_L,val_R,val_M;
+char rChar = '0';
 boolean ch2_neutral = true, ch3_neutral =  true;
-int var_maxPWM = 255, var_maxPWMTurn = 0;
+bool sysAlive = false, newData = false;
 bool detect = true;
+int var_maxPWM = 255;
 PPMReader ppm(interruptPin, channelAmount);
 
 void setup()
 {
   Serial.begin(9600);
+  rChar = "g";
   pinMode(ML_Ctrl, OUTPUT);
   pinMode(ML_PWM, OUTPUT);
   pinMode(MR_Ctrl, OUTPUT);
@@ -38,10 +41,23 @@ void setup()
   analogWrite(ML_PWM,0);
   digitalWrite(MR_Ctrl, LOW);
   analogWrite(MR_PWM,0);
-  delay(1000);
+
+  ch[2] = 1500;
+  delay(500);
  
 }
 
+void sysCheck()
+{
+  if (ch[2] > 900 && ch[1] > 900)
+  {
+    sysAlive = true;
+  }
+  else
+  {
+    sysAlive = false;
+  }
+}
 void readPPMData()
 {
   /*for (int channel = 1; channel <= channelAmount; ++channel) {
@@ -57,29 +73,30 @@ void readPPMData()
 
 void move_forward()
 {
- // int rawfront = map(drivevalue, 1500, 2000, 255, 0);
       digitalWrite(ML_Ctrl, HIGH);
       analogWrite(ML_PWM, pp1);
+
       digitalWrite(MR_Ctrl, HIGH);
       analogWrite(MR_PWM, pp2);
       Serial.println("FORWARD");
 }
+
 void move_backward()
 {
-  //int rawback = map(drivevalue, 1500, 1000, 0, 255);
       digitalWrite(ML_Ctrl, LOW);
       analogWrite(ML_PWM, pp1);
+
       digitalWrite(MR_Ctrl, LOW);
       analogWrite(MR_PWM, pp2);
       Serial.println("BACKWARD");
 }
+
 void move_left()
 {
- // int rawleft = map(turnvalue, 1500, 1000, 0, 255);
       digitalWrite(ML_Ctrl, LOW);
       analogWrite(ML_PWM, pp3);
+
       digitalWrite(MR_Ctrl, HIGH);
-      //int leftturn = map(rawleft, 0, 255, 255, 0);
       analogWrite(MR_PWM,pp4);
       Serial.println("LEFT");
 
@@ -90,6 +107,7 @@ void move_right()
    
       digitalWrite(ML_Ctrl, HIGH);
       analogWrite(ML_PWM, pp3);
+
       digitalWrite(MR_Ctrl, LOW);
       analogWrite(MR_PWM,pp4);
       Serial.println("RIGHT");
@@ -99,11 +117,12 @@ void neutral()
 {
   digitalWrite(ML_Ctrl, LOW);
   analogWrite(ML_PWM,0);
+
   digitalWrite(MR_Ctrl, LOW);
   analogWrite(MR_PWM,0);
 }
 
-void procedure(int myangle) {
+void rotateHServo(int myangle) {
   pulsewidth = myangle * 11 + 500; //calculate the value of pulse width
   digitalWrite(servoPin,HIGH);
   delayMicroseconds(pulsewidth); //The duration of high level is pulse width
@@ -134,6 +153,22 @@ void lineDetect(){
   val_M = digitalRead(M_pin);// read the M_pin
 }
 
+void recvOneChar() {
+    if (Serial.available() > 0) {
+        rChar = Serial.read();
+        newData = true;
+    }
+}
+
+void showNewData() {
+    if (newData == true) {
+        Serial.print("This just in ... ");
+        Serial.println(rChar);
+        newData = false;
+    }
+}
+
+
 
 void mobilize() 
 {
@@ -144,8 +179,14 @@ void mobilize()
   int four = ch[3];
   int five = ch[4];
   int six = ch[5];
-
+  
+  
+  sysCheck();
   objectDetect();
+
+  // Check if system is alive
+  if(sysAlive == true){
+
 
   //Object Detection
   if(detect == true){
@@ -156,11 +197,51 @@ void mobilize()
     pp2 = pp1;
     move_backward();
     Serial.println("Auto-moving backward");
+    delay(50);
   }
   
-  else{Serial.println("All Clear");}
+  //else{Serial.println("All Clear");}
 
   //Drive Controls
+    recvOneChar();
+    //showNewData();
+
+    if(detect == false){
+    if(rChar == 'w'){
+      pp5 = 180;
+      for(int i = 0; i < 3; i++){
+      rotateHServo(pp5);
+      }
+      Serial.println("got w");
+      
+      /*pp1 = 100;
+      pp2 = pp1;*/
+
+     // for(int i = 0; i < 5000; i++){
+      
+      //ch2_neutral = false;
+      //move_forward();
+      //delayMicroseconds(10);
+   //}
+    rChar = "g";
+    }
+
+    else if(rChar == 's'){
+      pp5 = 0;
+      for(int i = 0; i < 3; i++){
+      rotateHServo(pp5);
+      }
+      Serial.println("got s");
+      /*pp1 = 100;
+      pp2 = pp1;
+
+      for(int i = 0; i < 5000; i++){
+      ch2_neutral = false;
+      move_backward();
+      delayMicroseconds(10);
+    }*/
+
+    }}
   if (two > 1485 && two < 1515) // stay idle
   {
     ch2_neutral = true;
@@ -186,11 +267,11 @@ void mobilize()
   }
 
   //Turn Controls
-  if (one > 1485 && one < 1515) // stop 
+  if (one > 1485 && one < 1515 ) // stop 
   {
     ch3_neutral = true;
   }
-  else if (one >= 1550  && detect == false) // move right
+  else if (one >= 1550  && detect == false ) // move right
   {
     ch3_neutral = false;
     pp3 = abs(map(one, 1500, 2000, var_maxPWM, 0 ));
@@ -208,23 +289,24 @@ void mobilize()
     //turn();
   }
 
-  if (ch2_neutral == true && ch3_neutral == true) // neutral gear 
+  if (ch2_neutral == true && ch3_neutral == true && sysAlive == true) // neutral gear 
   {
     neutral();
   }
 
 // Servo Control
-  if(four > 1485 && four < 1550){
+  if(four > 1485 && four < 1550 && four > 900){
      digitalWrite(servoPin,LOW);
   }
-  else if( four < 1450){
+  else if( four < 1450  && four > 900){
     pp5 = abs(map(four, 1500, 1000, 90, 180));
-    procedure(pp5);
+    rotateHServo(pp5);
     
   }
-  else if(four > 1550){
+  else if(four > 1550 && four > 900){
     pp5 = abs(map(four, 1500, 2000, 90, 0));
-    procedure(pp5);
+    rotateHServo(pp5);
   }
- 
+ }
 }
+
