@@ -196,7 +196,7 @@ void init_GPIO()
    
   stop_Stop();
 }
-void Mobilize(){
+void mobilize(){
   //digitalWrite(LED_BUILTIN, HIGH);
   
   readPPMData();
