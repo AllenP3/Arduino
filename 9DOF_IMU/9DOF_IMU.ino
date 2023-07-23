@@ -26,7 +26,7 @@ float dt;
 unsigned long millisOld;
 
 #define BNO055_SAMPLERATE_DELAY_MS (100)
-
+//sample rate is 100Hz
 Adafruit_BNO055 myIMU = Adafruit_BNO055();
 
 void setup() {
