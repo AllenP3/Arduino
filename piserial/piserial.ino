@@ -1,10 +1,12 @@
-void setup() {
-  Serial.begin(9600);
+int ledPin = 2;
 
+void setup() {
+    pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
-  Serial.println("Hello darkness my old friend");
-  delay(1000);
-
-}
+	digitalWrite(ledPin, HIGH);
+	delay(500);
+	digitalWrite(ledPin, LOW);
+	delay(500);
+} 
