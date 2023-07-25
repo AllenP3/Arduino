@@ -4,6 +4,7 @@
 #include <InterruptHandler.h>
 #include <PPMReader.h>
 
+
 #define SPEED 100
 #define speedPinR 9   
 #define RightMotorDirPin1  22    
@@ -200,7 +201,6 @@ void mobilize(){
   //digitalWrite(LED_BUILTIN, HIGH);
   
   readPPMData();
-  if(ch1_gear) 
 
   if(two > 1515 || two < 1485){
     ch1_gear = true;
@@ -220,7 +220,7 @@ void mobilize(){
     stop_Stop();
   }
 
-  else if(ch1_gear = true && ch2_gear = true){
+  else if(ch1_gear == true && ch2_gear == true){
 
    if (two > 1515 && one > 1515)
   {
