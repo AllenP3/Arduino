@@ -66,7 +66,7 @@ thetaG=thetaG+gyr.y()*dt;
 phiG=phiG-gyr.x()*dt;
 
 
-// mag data
+// mag data tilt compensated
 
 phiRad = phi/360*(2*3.14);
 thetaRad = theta/360*(2*3.14);
@@ -81,12 +81,14 @@ phi=(phi-gyr.x()*dt)*.95+ phiM*.05;
 
 
 
-Serial.print(acc.x()/9.8);
+/*Serial.print(acc.x()/9.8);
 Serial.print(",");
 Serial.print(acc.y()/9.8);
 Serial.print(",");
 Serial.print(acc.z()/9.8);
-Serial.print(",");
+Serial.print(",");*/
+
+
 Serial.print(accel);
 Serial.print(",");
 Serial.print(gyro);
@@ -95,7 +97,7 @@ Serial.print(mg);
 Serial.print(",");
 Serial.print(system);
 Serial.print(",");
-Serial.print(thetaM);
+/*Serial.print(thetaM);
 Serial.print(",");
 Serial.print(phiM);
 Serial.print(",");
@@ -107,7 +109,7 @@ Serial.print(",");
 Serial.print(thetaG);
 Serial.print(",");
 Serial.print(phiG);
-Serial.print(",");
+Serial.print(",");*/
 Serial.print(theta);
 Serial.print(",");
 Serial.print(phi);
